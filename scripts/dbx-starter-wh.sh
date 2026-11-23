@@ -17,8 +17,7 @@ BUNDLE_DIR="${BUNDLE_DIR:-databricks}"
 
 # CLI >= 0.205: `databricks sql warehouses list`; older: `databricks sql-warehouses list`
 list_wh() {
-  databricks sql warehouses list --profile "$PROFILE" --output json 2>/dev/null \
-    || databricks sql-warehouses list --profile "$PROFILE" --output json
+  databricks warehouses list --profile "$PROFILE" --output json 2>/dev/null
 }
 WH=$(list_wh | jq -r '
   def arr: if type == "array" then . elif .warehouses then .warehouses elif .items then .items else [.] end;
