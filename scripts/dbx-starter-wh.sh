@@ -15,10 +15,16 @@ set -euo pipefail
 PROFILE="${DATABRICKS_PROFILE:-DEFAULT}"
 BUNDLE_DIR="${BUNDLE_DIR:-databricks}"
 
-WH=$(databricks sql-warehouses list --profile "$PROFILE" --output json \
-  | jq -r 'first(.[] | select((.name // "") | test("starter"; "i"))) // .[0] // empty')
-if [[ -z "$WH" ]]; then
-  echo "ERROR: no SQL warehouse found via 'databricks sql-warehouses list'" >&2
+# CLI >= 0.205: `databricks sql warehouses list`; older: `databricks sql-warehouses list`
+list_wh() {
+  databricks sql warehouses list --profile "$PROFILE" --output json 2>/dev/null \
+    || databricks sql-warehouses list --profile "$PROFILE" --output json
+}
+WH=$(list_wh | jq -r '
+  def arr: if type == "array" then . elif .warehouses then .warehouses elif .items then .items else [.] end;
+  (arr | first(.[] | select((.name // "") | test("starter"; "i")))) // (arr[0] // empty)')
+if [[ -z "$WH" || "$WH" == "null" ]]; then
+  echo "ERROR: no SQL warehouse found via 'databricks sql warehouses list'" >&2
   exit 1
 fi
 WH_ID=$(jq -r .id <<<"$WH")
