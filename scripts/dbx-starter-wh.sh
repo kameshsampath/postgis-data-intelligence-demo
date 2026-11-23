@@ -15,7 +15,8 @@ set -euo pipefail
 PROFILE="${DATABRICKS_PROFILE:-DEFAULT}"
 BUNDLE_DIR="${BUNDLE_DIR:-databricks}"
 
-# CLI >= 0.205: `databricks sql warehouses list`; older: `databricks sql-warehouses list`
+# CLI 1.x: `databricks warehouses list` (top-level group; older CLIs used
+# `sql warehouses list` / `sql-warehouses list`)
 list_wh() {
   databricks warehouses list --profile "$PROFILE" --output json 2>/dev/null
 }
