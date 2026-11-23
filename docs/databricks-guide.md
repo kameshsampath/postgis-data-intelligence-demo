@@ -255,18 +255,19 @@ with your 7 tables to any SQL warehouse, Genie, and AI Search — no data copied
 
 - **Paid workspace:** the bundle creates `${PREFIX}_streetlights_wh` (serverless 2X-Small,
   required for `ai_forecast()`), so nothing to do here.
-- **Free Edition:** only the pre-created starter warehouse is allowed. Let the helper
-  patch the bundle for you (finds the starter WH, comments out `resources.sql_warehouses`,
-  rewrites the warehouse references):
+- **Free Edition:** only the pre-created starter warehouse is allowed. Run the helper;
+  it writes a machine-local override to `databricks/local/free-edition.yml` (gitignored)
+  that points the bundle's warehouse resource at the starter, so the committed
+  `databricks.yml` stays untouched and `git status` stays clean:
 
 ```bash
 mise run dbx:use-starter-wh        # or: bash scripts/dbx-starter-wh.sh
 ```
 
-- **Local bundle overrides without touching the committed bundle:** `databricks.yml`
-  includes `./local/*.yml` (gitignored). Put machine-local changes there, e.g.
-  `mkdir -p databricks/local && cp databricks/local.example.yml databricks/local/override.yml`
-  and edit — DAB merges it over the base bundle.
+- **Local bundle overrides in general:** `databricks.yml` includes `./local/*.yml`
+  (gitignored). Put any machine-local change there, e.g.
+  `cp databricks/local.example.yml databricks/local/override.yml` and edit — DAB merges
+  it over the base bundle (same pattern as `.mise.local.toml`).
 
 Now validate and deploy (from `databricks/`, or `task dbx:validate` / `task dbx:deploy` from repo root):
 
