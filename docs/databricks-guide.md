@@ -233,8 +233,14 @@ plain `psql -h <host> -p 5432 -U <email> -d <database>`. Never commit `~/.pgpass
 
 ```bash
 databricks postgres create-catalog ${PREFIX}_streetlights_pg --profile "$DATABRICKS_PROFILE" \
-  --json "{\"spec\": {\"postgres_database\": \"$(jq -r .database /tmp/lb-cred.json)\", \
+  --json "{\"spec\": {\"postgres_database\": \"$LAKEBASE_DATABASE\", \
+                    \"create_database_if_missing\": true, \
                     \"branch\": \"projects/$LAKEBASE_PROJECT/branches/$LAKEBASE_BRANCH\"}}"
+# postgres_database must be the real PG database name in the branch (from
+# list-databases[].status.postgres_database, usually databricks_postgres; set
+# LAKEBASE_DATABASE in .env accordingly). create_database_if_missing=true lets the
+# catalog create it if absent; without it the call fails with
+# "createDatabaseIfNotExist is not enabled" when the database does not exist.
 ```
 
 The foreign catalog `${PREFIX}_streetlights_pg` now exposes schema `streetlights`
