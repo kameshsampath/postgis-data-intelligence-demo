@@ -1,0 +1,43 @@
+# Databricks specific ignores
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Databricks CLI cache
+.databricks/
+
+# Machine-local bundle overrides (merged via include: ./local/*.yml)
+local/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Compiled Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Log files
+*.log
+logs/
+
+# Build and distribution
+build/
+dist/
+*.egg-info/
+
+# Local development artifacts
+*.local
+*.dev
+
+# Database files
+*.db
+*.sqlite
+
+# Databricks workspace state files
+.workspace*

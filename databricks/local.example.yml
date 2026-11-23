@@ -1,0 +1,25 @@
+# Copyright 2025 Kamesh Sampath <kamesh.sampath@hotmail.com>
+# SPDX-License-Identifier: Apache-2.0
+#
+# Example of a MACHINE-LOCAL bundle override. databricks.yml includes ./local/*.yml
+# (gitignored), so copy this file to databricks/local/override.yml and edit freely
+# without touching the committed bundle:
+#
+#     mkdir -p databricks/local
+#     cp databricks/local.example.yml databricks/local/override.yml
+#
+# DAB merges included files over databricks.yml. Example overrides:
+#
+# resources:
+#   sql_warehouses:
+#     streetlights_wh:
+#       name: "Serverless Starter SQL Warehouse"   # Free Edition: reuse the starter WH
+#   jobs:
+#     setup:
+#       tasks:
+#         - task_key: setup
+#           sql_task:
+#             warehouse_id: "<existing-warehouse-id>"  # instead of the bundle-created one
+#
+# On Free Edition (only one warehouse allowed) prefer: mise run dbx:use-starter-wh
+# which patches the committed bundle safely instead.
