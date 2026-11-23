@@ -21,7 +21,7 @@ bundle:
 # Machine-local overrides: any file in ./local/*.yml is merged over this file.
 # ./local/ is gitignored — keep personal changes there (see local.example.yml).
 include:
-  - path: ./local/*.yml
+  - ./local/*.yml
 
 variables:
   prefix:
@@ -38,20 +38,22 @@ variables:
     default: streetlights
 
 targets:
+  # No workspace.host here: that field does not support ${env...} interpolation.
+  # The CLI picks up DATABRICKS_HOST and DATABRICKS_PROFILE from the environment
+  # (set in .env, auto-loaded by mise via _.file = ".env").
   dev:
     default: true
     mode: development
-    workspace:
-      host: ${env.DATABRICKS_HOST}
     variables:
       prefix: pgdemo
   prod:
     mode: production
-    workspace:
-      host: ${env.DATABRICKS_HOST}
     variables:
       prefix: prod
 
+# Jobs are run in dependency order manually (setup -> genie_views -> vector_search
+# -> forecast -> app) via `databricks bundle run <job> -t dev`; DAB has no job-level
+# depends_on field (it is task-level only).
 resources:
   catalogs:
     streetlights_catalog:
@@ -74,13 +76,13 @@ resources:
       cluster_size: 2X-Small
       enable_serverless_compute: true   # required for ai_forecast()
       auto_stop_mins: 30
-      comment: SQL warehouse for streetlights demo queries and Genie
+      # SQL warehouse for streetlights demo queries and Genie
 
   vector_search_endpoints:
     maintenance_vs:
       name: ${var.prefix}_streetlights_vs
       endpoint_type: STANDARD
-      comment: AI Search endpoint for maintenance-record text
+      # AI Search endpoint for maintenance-record text
 
   # NOTE: the vector search *index* is not a bundle resource here because it
   # needs the maintenance_records_text Delta table (created by the
@@ -112,9 +114,6 @@ resources:
 
     genie_views:
       name: ${var.prefix}_streetlights_genie_VIEWS
-      depends_on:
-        - task_key: setup
-          job_id: ${resources.jobs.setup.id}
       tasks:
         - task_key: genie_views
           sql_task:
@@ -124,9 +123,6 @@ resources:
 
     vector_search:
       name: ${var.prefix}_streetlights_VECTOR_SEARCH
-      depends_on:
-        - task_key: genie_views
-          job_id: ${resources.jobs.genie_views.id}
       tasks:
         - task_key: vector_search
           sql_task:
@@ -136,9 +132,6 @@ resources:
 
     forecast:
       name: ${var.prefix}_streetlights_FORECAST
-      depends_on:
-        - task_key: vector_search
-          job_id: ${resources.jobs.vector_search.id}
       tasks:
         - task_key: forecast
           sql_task:
@@ -148,9 +141,6 @@ resources:
 
     app:
       name: ${var.prefix}_streetlights_app_VIEWS
-      depends_on:
-        - task_key: forecast
-          job_id: ${resources.jobs.forecast.id}
       tasks:
         - task_key: app
           sql_task:
