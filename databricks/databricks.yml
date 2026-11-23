@@ -18,6 +18,11 @@ bundle:
   # genie_spaces and vector_search_endpoints require the direct deployment engine
   engine: direct
 
+# Machine-local overrides: any file in ./local/*.yml is merged over this file.
+# ./local/ is gitignored — keep personal changes there (see local.example.yml).
+include:
+  - path: ./local/*.yml
+
 variables:
   prefix:
     description: Resource prefix in LOWERCASE (Unity Catalog lowercases object names), e.g. pgdemo — objects are ${prefix}_streetlights_*

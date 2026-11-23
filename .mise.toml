@@ -72,6 +72,10 @@ run = "pre-commit run --all-files"
 description = "Refresh Lakebase OAuth token into ~/.pgpass + pg_service (expires in 1h), then use psql \"service=lakebase-demo\""
 run = "bash scripts/lb-service.sh lakebase-demo"
 
+[tasks."dbx:use-starter-wh"]
+description = "Free Edition: patch databricks.yml to reuse the pre-created starter SQL warehouse (only 1 warehouse allowed)"
+run = "bash scripts/dbx-starter-wh.sh"
+
 # ==========================================================================
 # Additional Tools to Install Manually
 # ==========================================================================

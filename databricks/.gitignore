@@ -8,6 +8,9 @@
 # Databricks CLI cache
 .databricks/
 
+# Machine-local bundle overrides (merged via include: ./local/*.yml)
+local/
+
 # IDE files
 .idea/
 .vscode/

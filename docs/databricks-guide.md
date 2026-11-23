@@ -241,6 +241,11 @@ databricks postgres create-catalog ${PREFIX}_streetlights_pg --profile "$DATABRI
 # LAKEBASE_DATABASE in .env accordingly). create_database_if_missing=true lets the
 # catalog create it if absent; without it the call fails with
 # "createDatabaseIfNotExist is not enabled" when the database does not exist.
+
+Once created, see the foreign catalog in the workspace UI: **Catalog** (left nav) →
+`${PREFIX}_streetlights_pg` → schema `streetlights` → the 7 tables. Or in the SQL
+editor: `SHOW CATALOGS;` and
+`SELECT count(*) FROM ${PREFIX}_streetlights_pg.streetlights.street_lights;` (expect 5000).
 ```
 
 The foreign catalog `${PREFIX}_streetlights_pg` now exposes schema `streetlights`
@@ -250,19 +255,18 @@ with your 7 tables to any SQL warehouse, Genie, and AI Search — no data copied
 
 - **Paid workspace:** the bundle creates `${PREFIX}_streetlights_wh` (serverless 2X-Small,
   required for `ai_forecast()`), so nothing to do here.
-- **Free Edition:** only the pre-created starter warehouse is allowed. Get its ID:
+- **Free Edition:** only the pre-created starter warehouse is allowed. Let the helper
+  patch the bundle for you (finds the starter WH, comments out `resources.sql_warehouses`,
+  rewrites the warehouse references):
 
 ```bash
-databricks sql-warehouses list --output json | jq -r '.[] | "\(.id)\t\(.name)\t\(.warehouse_type)\t\(.state)"'
-# pick the starter warehouse (2X-Small, serverless), copy its id
+mise run dbx:use-starter-wh        # or: bash scripts/dbx-starter-wh.sh
 ```
 
-Then edit `databricks/databricks.yml`: comment out the `resources.sql_warehouses`
-block and replace every `${resources.sql_warehouses.streetlights_wh.id}` with that ID:
-
-```bash
-sed -i 's/${resources.sql_warehouses.streetlights_wh.id}/<STARTER_WH_ID>/g' databricks/databricks.yml
-```
+- **Local bundle overrides without touching the committed bundle:** `databricks.yml`
+  includes `./local/*.yml` (gitignored). Put machine-local changes there, e.g.
+  `mkdir -p databricks/local && cp databricks/local.example.yml databricks/local/override.yml`
+  and edit — DAB merges it over the base bundle.
 
 Now validate and deploy (from `databricks/`, or `task dbx:validate` / `task dbx:deploy` from repo root):
 
